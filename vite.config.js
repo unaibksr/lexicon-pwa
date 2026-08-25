@@ -6,7 +6,8 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
+      injectRegister: null,
       includeAssets: ['favicon.svg', 'favicon-32x32.png', 'apple-icon-180x180.png', 'android-icon-192x192.png', 'ms-icon-310x310.png'],
       manifest: {
         name: 'Lexicon Personal Dictionary',

@@ -3,6 +3,7 @@ import {
   BookMarked, Plus, Search, Trash2,
   Globe, Sparkles, X, Download, Upload
 } from 'lucide-react';
+import seedWords from './initialWords.js';
 
 const POS_LIST = ['noun', 'verb', 'adjective', 'adverb', 'pronoun', 'preposition', 'conjunction', 'idiom'];
 const POS_RE = new RegExp('\\(\\s*(' + POS_LIST.join('|') + ')\\s*\\)', 'i');
@@ -103,17 +104,9 @@ export default function App() {
   const [words, setWords] = useState(() => {
     localStorage.removeItem('lexicon_dictionary');
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved).map(normalizeWord) : [];
+    return saved ? JSON.parse(saved).map(normalizeWord) : seedWords.map(normalizeWord);
   });
 
-  useEffect(() => {
-    if (!localStorage.getItem(STORAGE_KEY)) {
-      import('./initialWords.js')
-        .then(m => setWords(m.default.map(normalizeWord)))
-        .catch(() => {});
-    }
-  }, []);
-  
   const [selectedId, setSelectedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAdding, setIsAdding] = useState(false);

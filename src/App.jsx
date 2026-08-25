@@ -110,7 +110,7 @@ export default function App() {
     return base.map(normalizeWord);
   });
   
-  const [selectedId, setSelectedId] = useState(words[0]?.id || null);
+  const [selectedId, setSelectedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [apiLoading, setApiLoading] = useState(false);

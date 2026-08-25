@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  BookMarked, Plus, Search, Trash2, 
-  Globe, Sparkles, X
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  BookMarked, Plus, Search, Trash2,
+  Globe, Sparkles, X, Download, Upload
 } from 'lucide-react';
+import seedWords from './initialWords.js';
 
 const POS_LIST = ['noun', 'verb', 'adjective', 'adverb', 'pronoun', 'preposition', 'conjunction', 'idiom'];
 const POS_RE = new RegExp('\\(\\s*(' + POS_LIST.join('|') + ')\\s*\\)', 'i');
@@ -98,9 +99,10 @@ const normalizeWord = (w) => {
   };
 };
 
-const INITIAL_WORDS = [];
+const INITIAL_WORDS = seedWords;
 
 export default function App() {
+  const fileInputRef = useRef(null);
   const [words, setWords] = useState(() => {
     localStorage.removeItem('lexicon_dictionary');
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -204,6 +206,56 @@ export default function App() {
     if (selectedId === id) setSelectedId(words.find(w => w.id !== id)?.id || null);
   };
 
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(words, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'lexicon-words.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const imported = JSON.parse(reader.result);
+        if (!Array.isArray(imported)) throw new Error('File is not a word list');
+        setWords(prev => {
+          const merged = [...prev];
+          for (const raw of imported) {
+            const w = normalizeWord(raw);
+            if (!w.word) continue;
+            const idx = merged.findIndex(x => x.word.toLowerCase() === w.word.toLowerCase());
+            if (idx === -1) {
+              merged.unshift(w);
+            } else {
+              const existing = merged[idx];
+              const defs = [...existing.definitions];
+              for (const d of w.definitions) {
+                const isDup = defs.some(ex =>
+                  ex.definition.trim().toLowerCase() === d.definition.trim().toLowerCase() &&
+                  (ex.example || '').trim().toLowerCase() === (d.example || '').trim().toLowerCase()
+                );
+                if (!isDup) defs.push(d);
+              }
+              merged[idx] = { ...existing, definitions: defs };
+            }
+          }
+          return merged;
+        });
+      } catch (err) {
+        alert('Could not import: ' + err.message);
+      } finally {
+        e.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="flex h-screen w-full flex-col bg-slate-950 text-slate-100 antialiased md:flex-row overflow-hidden">
       
@@ -224,13 +276,30 @@ export default function App() {
             </div>
           </div>
 
-          <button 
-            onClick={() => setIsAdding(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-600/20 active:scale-95"
-            title="Add New Word"
-          >
-            <Plus className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExport}
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700 transition-colors"
+              title="Export words"
+            >
+              <Download className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700 transition-colors"
+              title="Import words"
+            >
+              <Upload className="h-5 w-5" />
+            </button>
+            <input ref={fileInputRef} type="file" accept="application/json" className="hidden" onChange={handleImport} />
+            <button 
+              onClick={() => setIsAdding(true)}
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-600/20 active:scale-95"
+              title="Add New Word"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Search Bar */}

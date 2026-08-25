@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['favicon.svg', 'favicon-32x32.png', 'apple-icon-180x180.png', 'android-icon-192x192.png', 'ms-icon-310x310.png'],
       manifest: {
         name: 'Lexicon Personal Dictionary',
         short_name: 'Lexicon',
@@ -18,11 +18,11 @@ export default defineConfig({
         orientation: 'portrait',
         categories: ['education', 'reference'],
         icons: [
-          { src: 'pwa-72x72.png', sizes: '72x72', type: 'image/png' },
-          { src: 'pwa-96x96.png', sizes: '96x96', type: 'image/png' },
-          { src: 'pwa-144x144.png', sizes: '144x144', type: 'image/png' },
-          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'pwa-384x384.png', sizes: '384x384', type: 'image/png' },
+          { src: 'android-icon-72x72.png', sizes: '72x72', type: 'image/png' },
+          { src: 'android-icon-96x96.png', sizes: '96x96', type: 'image/png' },
+          { src: 'android-icon-144x144.png', sizes: '144x144', type: 'image/png' },
+          { src: 'android-icon-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'ms-icon-310x310.png', sizes: '310x310', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
           { src: 'pwa-maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
         ]

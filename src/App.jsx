@@ -3,7 +3,6 @@ import {
   BookMarked, Plus, Search, Trash2,
   Globe, Sparkles, X, Download, Upload
 } from 'lucide-react';
-import seedWords from './initialWords.js';
 
 const POS_LIST = ['noun', 'verb', 'adjective', 'adverb', 'pronoun', 'preposition', 'conjunction', 'idiom'];
 const POS_RE = new RegExp('\\(\\s*(' + POS_LIST.join('|') + ')\\s*\\)', 'i');
@@ -99,16 +98,21 @@ const normalizeWord = (w) => {
   };
 };
 
-const INITIAL_WORDS = seedWords;
-
 export default function App() {
   const fileInputRef = useRef(null);
   const [words, setWords] = useState(() => {
     localStorage.removeItem('lexicon_dictionary');
     const saved = localStorage.getItem(STORAGE_KEY);
-    const base = saved ? JSON.parse(saved) : INITIAL_WORDS;
-    return base.map(normalizeWord);
+    return saved ? JSON.parse(saved).map(normalizeWord) : [];
   });
+
+  useEffect(() => {
+    if (!localStorage.getItem(STORAGE_KEY)) {
+      import('./initialWords.js')
+        .then(m => setWords(m.default.map(normalizeWord)))
+        .catch(() => {});
+    }
+  }, []);
   
   const [selectedId, setSelectedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -339,7 +343,11 @@ export default function App() {
         {/* Word List */}
         <div className="flex-1 overflow-y-auto px-2 space-y-1">
           {filteredWords.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-sm">No words found.</div>
+            <div className="p-8 text-center text-slate-500 text-sm">
+              {words.length === 0
+                ? 'Your dictionary is empty. Tap + to add words.'
+                : 'No words match your search.'}
+            </div>
           ) : (
             filteredWords.map((item) => {
               const isSelected = item.id === activeWord?.id;

@@ -124,6 +124,26 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
   }, [words]);
 
+  // Push a history entry when opening a word so the hardware/swipe Back
+  // button returns to the list instead of closing the installed PWA.
+  const prevSelected = useRef(null);
+  useEffect(() => {
+    if (selectedId && !prevSelected.current) {
+      window.history.pushState({ view: 'detail' }, '');
+    }
+    prevSelected.current = selectedId;
+  }, [selectedId]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      if (selectedId) setSelectedId(null);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [selectedId]);
+
+  const handleBack = () => window.history.back();
+
   const filteredWords = words.filter(item => {
     const matchesSearch = item.word.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
@@ -359,7 +379,7 @@ export default function App() {
             
             {/* Mobile Back Button */}
             <button 
-              onClick={() => setSelectedId(null)} 
+              onClick={handleBack} 
               className="md:hidden flex items-center gap-2 text-xs font-medium text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg"
             >
               ← Back to list
